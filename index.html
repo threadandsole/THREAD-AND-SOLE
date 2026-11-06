@@ -149,6 +149,32 @@ const supabaseClient = window.supabase.createClient(
 );
 
 console.log("THREAD & SOLE Supabase Connected!");
+  
+async function loadSupabaseProducts() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('Products')
+      .select('*');
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      products = data.map(p => ({
+        ...p,
+        photo: p.image_url
+      }));
+
+      render();
+    }
+
+    console.log("Products loaded from Supabase!");
+  } catch (error) {
+    console.error("Product loading error:", error);
+  }
+}
+
+loadSupabaseProducts();
+
 </script>
 </body>
 </html>
