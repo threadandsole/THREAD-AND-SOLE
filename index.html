@@ -137,3 +137,16 @@ render();
 </script>
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://ihgkogvvxmnzrobofpoh.supabase.co/rest/v1/";
+const SUPABASE_KEY = "sb_publishable_QAjEoNCF-MO5VTFDYdYHZA_HnGOePYx";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+console.log("THREAD & SOLE Supabase Connected!");
+</script>
