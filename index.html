@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THREAD & SOLE | Fashion Store</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:#241536;background:#fff9fc}
+header{background:#35145b;color:white;padding:18px;text-align:center}
+header h1{margin:0;font-family:Georgia,serif;letter-spacing:3px}
+header p{font-size:11px;letter-spacing:2px}
+nav{display:flex;justify-content:center;gap:20px;padding:12px;background:#f6d9ed}
+button{border:0;padding:11px 16px;border-radius:8px;background:#6725a5;color:white;cursor:pointer}
+.hero{padding:45px 20px;text-align:center;background:linear-gradient(120deg,#ffc4dc,#d7c5ff,#b8eaff)}
+.hero h2{font-size:38px;margin:0 0 12px}
+.hero strong{color:#a00064;font-size:26px}
+main{max-width:1100px;margin:auto;padding:22px}
+h2{font-family:Georgia,serif}
+.brands{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.brand{background:#f2d8ff;padding:12px 18px;border-radius:20px;font-weight:bold}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px #0001}
+.card img{width:100%;height:190px;object-fit:cover;background:#eee}
+.info{padding:12px}
+.info h3{margin:7px 0}
+.price{font-weight:bold;font-size:18px}
+.old{text-decoration:line-through;color:#999;font-size:13px}
+.off{color:#d00069;font-size:12px}
+#admin{display:none;background:#fff0f8;padding:18px;border-radius:12px;margin:20px 0}
+input{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ddd;border-radius:7px}
+footer{text-align:center;padding:25px;background:#35145b;color:white;margin-top:30px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<h1>THREAD & SOLE</h1>
+<p>FASHION • FOOTWEAR • LIFESTYLE</p>
+<button onclick="toggleAdmin()">OWNER PANEL</button>
+<button onclick="showCart()">MY BAG (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+<h2>STYLE IT YOUR WAY!</h2>
+<strong>MEGA FASHION SALE</strong>
+<p>Discover your favourite styles in one place.</p>
+</section>
+
+<main>
+<h2>Shop by Brand</h2>
+<div class="brands">
+<span class="brand">NIKE</span><span class="brand">ADIDAS</span>
+<span class="brand">PUMA</span><span class="brand">ZARA</span>
+<span class="brand">H&M</span><span class="brand">LEVI'S</span>
+</div>
+
+<section id="admin">
+<h2>Admin — Add Product</h2>
+<label>Brand</label><input id="brand" placeholder="Nike">
+<label>Product Name</label><input id="name" placeholder="Sneakers">
+<label>MRP (₹)</label><input id="mrp" type="number" placeholder="4999">
+<label>Your Selling Price (₹)</label><input id="price" type="number" placeholder="2499">
+<label>Product Photo</label><input id="photo" type="file" accept="image/*">
+<button onclick="addProduct()">SAVE PRODUCT</button>
+<h3>Manage Products</h3>
+<div id="manage"></div>
+</section>
+
+<h2>Latest Collection</h2>
+<div class="grid" id="products"></div>
+</main>
+
+<footer>THREAD & SOLE • YOUR STYLE, YOUR WAY</footer>
+
+<script>
+let products=JSON.parse(localStorage.getItem("tsProducts")||"[]");
+let bag=[];
+function persist(){localStorage.setItem("tsProducts",JSON.stringify(products))}
+function toggleAdmin(){
+let p=document.getElementById("admin");
+p.style.display=p.style.display==="block"?"none":"block";
+manage();
+}
+function addProduct(){
+let brand=document.getElementById("brand").value.trim();
+let name=document.getElementById("name").value.trim();
+let mrp=Number(document.getElementById("mrp").value);
+let price=Number(document.getElementById("price").value);
+let file=document.getElementById("photo").files[0];
+if(!brand||!name||!mrp||!price||price>mrp){
+alert("Please enter valid product details and prices.");return;
+}
+if(file){
+let reader=new FileReader();
+reader.onload=()=>save(reader.result);
+reader.readAsDataURL(file);
+}else save("");
+function save(photo){
+products.push({id:Date.now(),brand,name,mrp,price,photo});
+persist();render();manage();alert("Product added!");
+}
+}
+function removeProduct(id){
+products=products.filter(p=>p.id!==id);
+persist();render();manage();
+}
+function manage(){
+document.getElementById("manage").innerHTML=products.map(p=>
+`<p>${p.brand} — ${p.name} — ₹${p.price}
+<button onclick="removeProduct(${p.id})">DELETE</button></p>`
+).join("");
+}
+function render(){
+document.getElementById("products").innerHTML=products.map(p=>{
+let off=Math.round((1-p.price/p.mrp)*100);
+return `<article class="card">
+${p.photo?`<img src="${p.photo}">`:'<div style="height:190px;background:#f2d8ff;display:grid;place-items:center">Fashion</div>'}
+<div class="info"><small>${p.brand}</small><h3>${p.name}</h3>
+<span class="old">₹${p.mrp}</span>
+<div class="price">₹${p.price}</div>
+<div class="off">${off}% OFF</div>
+<button onclick="addBag(${p.id})">ADD TO BAG</button>
+</div></article>`;
+}).join("")||"<p>Products coming soon!</p>";
+}
+function addBag(id){
+let p=products.find(x=>x.id===id);bag.push(p);
+document.getElementById("count").textContent=bag.length;
+alert("Added to your bag!");
+}
+function showCart(){
+alert(bag.length?bag.map(p=>p.name+" — ₹"+p.price).join("\\n"):"Your bag is empty.");
+}
+render();
+</script>
+</body>
+</html>
